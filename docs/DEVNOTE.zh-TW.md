@@ -126,3 +126,104 @@ for (const m of jsonStr.matchAll(urlRe)) { /* 收 */ }
 `lib/adapters/` 的 adapter 模式把這些招數抽成可重用元件。新 adapter 只要覆寫 `extractMainImages`、改成自己網站的 URL pattern 跟 ID 抽取邏輯就好，結構不變。
 
 要寫一個新 adapter 請看 [`ADAPTERS.zh-TW.md`](./ADAPTERS.zh-TW.md)。
+
+## 寫完另外三個 adapter 之後的補充心得
+
+Taobao 之後又加了三個：1688、Mercari 日本、Behance。每個都帶出一個值得記錄的新 insight。
+
+### 1688：seller ID 在 filename、不在路徑
+
+淘寶把店家 ID 放在 URL **路徑**：
+
+```
+/imgextra/i3/2221364769133/O1CN01...jpg
+              └── 店家 ──┘
+```
+
+1688 放在 **filename**、`!!` 後面：
+
+```
+/img/ibank/.../O1CN01..._!!2218318563061-0-cib.jpg
+                          └── 店家 ──┘
+```
+
+同一招（算每個 ID 出現次數、鎖定主店家）、不同的抽取方式：
+
+```javascript
+// Taobao
+const m = u.match(/\/(\d{8,})\/O1CN/);
+
+// 1688
+const m = u.match(/!!(\d{8,})[-_]/);
+```
+
+有個小坑：阿里內部的 icon set 資產 seller ID 都是 `6000000...` 開頭。如果不過濾、它們在 icon 很多的頁面會贏掉主店家。解法：
+
+```javascript
+if (m && !m[1].startsWith('6000000')) {
+  sellerCounts[m[1]] = (sellerCounts[m[1]] || 0) + 1;
+}
+```
+
+### Mercari：不用 seller lock、改用 item ID 群組
+
+C2C 平台簡單多了。每個 listing 都是獨立物件、有自己的照片：
+
+```
+/photos/m92885561183_1.jpg
+/photos/m92885561183_2.jpg
+/photos/m92885561183_3.jpg
+```
+
+沒有跨店家推薦干擾、因為每個 item 就是一個獨立實體。用 item ID 前綴鎖定、邏輯一模一樣：
+
+```javascript
+const idCounts = {};
+for (const u of urls) {
+  const m = u.match(/\/photos\/([\w-]+?)(_\d+)?\.(jpg|jpeg|png|webp)/i);
+  if (m) idCounts[m[1]] = (idCounts[m[1]] || 0) + 1;
+}
+const targetId = Object.entries(idCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+urls = urls.filter((u) => u.includes(`/photos/${targetId}`));
+```
+
+形狀完全一樣 — 挑出現最多的 ID、過濾到那一組。只是這個 ID 換成 item ID 而不是 seller ID。
+
+### Behance：同圖五解析度、只留最大那張
+
+Behance 是設計作品集站、對圖質要求很高。同一張圖會餵多個解析度：
+
+```
+/projects/original/<hash>.png                              (原檔、例如 14 MB)
+/project_modules/2800_webp/<hash>.<variant>.webp           (大)
+/project_modules/1400_webp/<hash>.<variant>.webp           (中)
+/project_modules/fs/<hash>.<variant>.png                   (全螢幕)
+/project_modules/disp/<hash>.<variant>.png                 (顯示縮圖)
+```
+
+filename dedup 在這場景不夠 — 五個尺寸 filename 都不同。要 group-by-hash 再挑最大：
+
+```javascript
+const byHash = new Map();
+for (const url of urls) {
+  const { hash, size } = parseBehanceUrl(url); // 抽出 hash + 尺寸
+  const pixels = behanceSizePixels(size);      // 'source'=Infinity、'2800_webp'=2800、依此類推
+  const baseHash = hash.split('.')[0];          // 去掉 per-variant 後綴
+  const existing = byHash.get(baseHash);
+  if (!existing || pixels > existing.pixels) {
+    byHash.set(baseHash, { url, pixels });
+  }
+}
+return [...byHash.values()].map((x) => x.url);
+```
+
+通用 pattern：CDN 同圖多尺寸時、filename 會變、但 filename 裡會藏一個穩定的 **content hash**。把它抽出來、group on 它、挑最大那張。任何用「尺寸 tag URL」的圖庫 CDN 都通。
+
+### 整理表
+
+| Adapter | ID 類型 | ID 位置 | 解析度策略 |
+|---------|---------|---------|-----------|
+| Taobao  | 店家 ID | URL 路徑 | 任挑（單一尺寸） |
+| 1688    | 店家 ID | filename (`!!ID`) | 任挑（單一尺寸） |
+| Mercari | item ID | filename 前綴 | 任挑（單一尺寸） |
+| Behance | content hash | filename 前綴 | 挑最大尺寸 |

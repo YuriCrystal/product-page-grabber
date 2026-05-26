@@ -126,3 +126,104 @@ These three tricks aren't Taobao-specific:
 The adapter pattern in `lib/adapters/` keeps these tricks reusable. New adapters override `extractMainImages` with their own URL pattern and selector ID extraction, but the structure stays the same.
 
 See [`ADAPTERS.md`](./ADAPTERS.md) for how to write one.
+
+## How the tricks actually generalized (notes from building 3 more adapters)
+
+After Taobao, three more adapters got built: 1688, Mercari Japan, Behance. Each surfaced one new insight worth recording.
+
+### 1688: seller ID is in the filename, not the path
+
+Taobao puts the seller ID in the image URL **path**:
+
+```
+/imgextra/i3/2221364769133/O1CN01...jpg
+              └─ seller ─┘
+```
+
+1688 puts it in the **filename**, after a `!!` delimiter:
+
+```
+/img/ibank/.../O1CN01..._!!2218318563061-0-cib.jpg
+                          └── seller ──┘
+```
+
+Same trick (count occurrences, lock to the dominant seller), different extraction:
+
+```javascript
+// Taobao
+const m = u.match(/\/(\d{8,})\/O1CN/);
+
+// 1688
+const m = u.match(/!!(\d{8,})[-_]/);
+```
+
+There's a wrinkle: Alibaba's internal icon-set assets use seller IDs starting with `6000000...`. They'd otherwise win the seller-frequency count on listings with lots of UI icons. Easy fix:
+
+```javascript
+if (m && !m[1].startsWith('6000000')) {
+  sellerCounts[m[1]] = (sellerCounts[m[1]] || 0) + 1;
+}
+```
+
+### Mercari: no seller lock needed — group by item ID instead
+
+C2C platforms are simpler. Each listing is one unique item with its own photos:
+
+```
+/photos/m92885561183_1.jpg
+/photos/m92885561183_2.jpg
+/photos/m92885561183_3.jpg
+```
+
+No cross-seller recommendation bleed because each item is its own entity. Lock by item ID prefix instead of seller:
+
+```javascript
+const idCounts = {};
+for (const u of urls) {
+  const m = u.match(/\/photos\/([\w-]+?)(_\d+)?\.(jpg|jpeg|png|webp)/i);
+  if (m) idCounts[m[1]] = (idCounts[m[1]] || 0) + 1;
+}
+const targetId = Object.entries(idCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+urls = urls.filter((u) => u.includes(`/photos/${targetId}`));
+```
+
+The shape is identical — pick the dominant identifier, filter to its group. The identifier just happens to be an item ID instead of a seller ID.
+
+### Behance: same image at 5 resolutions — keep only the biggest
+
+Behance is a design portfolio site, so it goes hard on image quality. The same image gets served at multiple resolutions:
+
+```
+/projects/original/<hash>.png                              (source, e.g. 14 MB)
+/project_modules/2800_webp/<hash>.<variant>.webp           (large)
+/project_modules/1400_webp/<hash>.<variant>.webp           (medium)
+/project_modules/fs/<hash>.<variant>.png                   (full-screen)
+/project_modules/disp/<hash>.<variant>.png                 (display thumb)
+```
+
+Filename dedup as written would keep all five (different filenames per size). We need a smarter group-by-hash + pick-largest pass:
+
+```javascript
+const byHash = new Map();
+for (const url of urls) {
+  const { hash, size } = parseBehanceUrl(url); // pulls out the hash + size
+  const pixels = behanceSizePixels(size);      // 'source'=Infinity, '2800_webp'=2800, etc.
+  const baseHash = hash.split('.')[0];          // strip per-variant suffix
+  const existing = byHash.get(baseHash);
+  if (!existing || pixels > existing.pixels) {
+    byHash.set(baseHash, { url, pixels });
+  }
+}
+return [...byHash.values()].map((x) => x.url);
+```
+
+The general pattern: when a CDN serves the same image at multiple sizes, the filename varies but a stable **content hash** is buried in there. Extract it, group on it, pick the biggest. Works for any image CDN with size-tagged URLs.
+
+### Summary table
+
+| Adapter | Identifier type | Identifier location | Resolution strategy |
+|---------|----------------|---------------------|---------------------|
+| Taobao  | Seller ID      | URL path            | Pick any (one size) |
+| 1688    | Seller ID      | Filename (`!!ID`)   | Pick any (one size) |
+| Mercari | Item ID        | Filename prefix     | Pick any (one size) |
+| Behance | Content hash   | Filename prefix     | Pick largest size   |
