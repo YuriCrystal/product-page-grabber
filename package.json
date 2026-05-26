@@ -1,0 +1,29 @@
+{
+  "name": "product-page-grabber",
+  "version": "0.1.0",
+  "description": "A Playwright-based pattern for archiving product page images from e-commerce sites. Pluggable adapter architecture with built-in tricks for filtering recommendation bleed and locking onto the correct seller.",
+  "main": "grab.js",
+  "bin": {
+    "ppg": "./grab.js",
+    "ppg-setup": "./setup.js"
+  },
+  "scripts": {
+    "setup": "node setup.js",
+    "grab": "node grab.js"
+  },
+  "keywords": [
+    "playwright",
+    "scraper",
+    "product-images",
+    "ecommerce",
+    "archiver"
+  ],
+  "author": "Yuri",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.48.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

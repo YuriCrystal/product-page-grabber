@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Persistent browser profiles (contain login cookies — never commit)
+.profile/
+.profile-*/
+
+# Downloaded image folders (output) — root-anchored to avoid matching skills/grab-*/
+/product-grab-*/
+/taobao-grab-*/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local config
+.env
+.env.local
