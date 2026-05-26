@@ -80,7 +80,7 @@ This repo ships with three production adapters:
 | Site | Adapter | Notes |
 |------|---------|-------|
 | Taobao / Tmall | `lib/adapters/taobao.js` | Keyword search via `s.taobao.com/search`, image search via 搜同款, SKU extraction via JS data objects |
-| 1688 | `lib/adapters/alibaba1688.js` | Keyword search via `s.1688.com`, custom filename-based seller-ID lock (1688 uses `!!<id>` not `/id/`) |
+| 1688 | `lib/adapters/alibaba1688.js` | Keyword search via `s.1688.com`, custom filename-based seller-ID lock (1688 uses `!!<id>` not `/id/`). Currently grabs the 5 carousel main images only — the 商品详情 description block requires extra tab activation and isn't covered yet. |
 | Mercari Japan | `lib/adapters/mercari.js` | Keyword search via `jp.mercari.com/search`, item-ID based image grouping, no SKU (C2C) |
 
 Pick the adapter explicitly with `--site=taobao | 1688 | mercari`, or it auto-detects from the product URL.
