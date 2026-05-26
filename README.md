@@ -106,16 +106,33 @@ Then in any Claude Code session:
 
 The skill walks you through keyword → result selection → grab in a single conversation.
 
+## What this tool is NOT for
+
+- **Mass downloading from search engines** (Google Images, Bing, etc.) — copyright holders are spread across thousands of unrelated sites and you have no relationship with any of them.
+- **Bulk image harvesting across the open web** — same problem at larger scale.
+- **Building image training datasets** — there are dedicated tools and licensed sources for this; please use them.
+
+If you need image discovery (rather than archiving a specific page you already know), use a dedicated stock API like [Unsplash](https://unsplash.com/developers) or [Pexels](https://www.pexels.com/api/), or generate images with an AI tool.
+
 ## Safe-use guidelines
 
-This tool is for **archiving your own purchase research and personal records**. Please:
+This tool is for **archiving images from a specific page you already have a relationship with** — your shopping cart, a designer's Behance project you're studying, a listing you bookmarked. Please:
 
 - Respect each site's robots.txt and ToS.
 - Don't run high-frequency batch loops — there are random waits built in, don't strip them out.
-- Don't share scraped images publicly without the original seller's permission.
+- Don't share scraped images publicly without the original creator's / seller's permission.
 - If a site blocks you (captcha, login wall), stop and reconsider whether automation is the right approach.
 
-The maintainers can't be responsible for misuse.
+## Responsibility
+
+I (the author) provide this tool as-is under MIT. **You choose which sites to point it at — that choice is yours.** I cannot be responsible for:
+
+- What sites you scrape with it
+- Whether your usage complies with those sites' ToS
+- Whether you have the right to redistribute what you download
+- Any legal consequences of your usage
+
+If you're not sure whether a particular use is okay, the answer is probably "no" — find a properly licensed source instead.
 
 ## Tech stack
 
