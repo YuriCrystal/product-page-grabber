@@ -1,12 +1,12 @@
-**English** | [繁體中文](./ADAPTERS.zh-TW.md)
+[English](./ADAPTERS.md) | **繁體中文**
 
-# Writing a new adapter
+# 寫一個新 adapter
 
-Each adapter is a class that extends `BaseAdapter` (`lib/adapters/base.js`) and registers itself in `lib/adapters/index.js`.
+每個 adapter 都是一個繼承 `BaseAdapter`（`lib/adapters/base.js`）的 class，然後在 `lib/adapters/index.js` 註冊。
 
-## Minimum viable adapter
+## 最小可用 adapter
 
-Handles direct product URLs only — no search.
+只處理直接給商品 URL 的情境，不支援搜尋。
 
 ```js
 // lib/adapters/example.js
@@ -26,7 +26,7 @@ class ExampleAdapter extends BaseAdapter {
 
   static async extractMainImages(page) {
     return page.evaluate(() => {
-      // Return an array of normalized full-size image URLs.
+      // 回傳一個正規化後的完整尺寸圖片 URL 陣列
       return [...document.querySelectorAll('img.product-photo')]
         .map((i) => i.src)
         .filter(Boolean);
@@ -37,7 +37,7 @@ class ExampleAdapter extends BaseAdapter {
 module.exports = { ExampleAdapter };
 ```
 
-Register it:
+註冊：
 
 ```js
 // lib/adapters/index.js
@@ -45,17 +45,17 @@ const { ExampleAdapter } = require('./example');
 const ADAPTERS = [TaobaoAdapter, ExampleAdapter];
 ```
 
-That's enough to support:
+這樣就支援：
 
 ```bash
 node grab.js "https://example.com/product/123"
 ```
 
-## Adding keyword search
+## 加上關鍵字搜尋
 
 ```js
 class ExampleAdapter extends BaseAdapter {
-  // ... above ...
+  // ... 上面那些 ...
 
   static supportsKeywordSearch = true;
 
@@ -82,11 +82,11 @@ class ExampleAdapter extends BaseAdapter {
 }
 ```
 
-Now `node grab.js "搜尋詞"` works (with whichever adapter is the default — or pass `--site=example`).
+然後 `node grab.js "搜尋詞"` 就能跑（用預設 adapter，或加 `--site=example` 指定）。
 
-## Adding image search
+## 加上以圖搜圖
 
-Optional. Implement these three methods:
+選用。實作這三個 method：
 
 ```js
 static supportsImageSearch = true;
@@ -106,9 +106,9 @@ static async waitForImageResults(page) {
 }
 ```
 
-After `waitForImageResults` returns, `extractResults` should work on the resulting page.
+`waitForImageResults` 回傳後，`extractResults` 就能在結果頁上跑。
 
-## Adding SKU/variant image extraction
+## 加上 SKU / 選項圖抽取
 
 ```js
 static async extractSkuImages(page) {
@@ -120,29 +120,29 @@ static async extractSkuImages(page) {
 }
 ```
 
-The CLI automatically dedupes SKU images against the main set and downloads them to `_options/`.
+CLI 會自動把 SKU 圖跟主圖去重、存到 `_options/` 子資料夾。
 
-## Filter helpers
+## 過濾 helper
 
-The three filtering tricks in `docs/DEVNOTE.md` (seller-ID lock, recommendation-bleed walker, filename dedup) are currently inlined in `taobao.js`. If your adapter benefits from them, copy the pattern. Future versions of this repo may extract them into `lib/filters.js` for reuse.
+`docs/DEVNOTE.zh-TW.md` 提到的三招（seller ID lock、recommendation-bleed walker、filename dedup）目前內嵌在 `taobao.js` 裡。如果你的 adapter 用得到、直接複製 pattern。未來版本可能會把它們抽到 `lib/filters.js` 共用。
 
-## Testing
+## 測試
 
-There's no CI yet. Manual smoke test for a new adapter:
+目前沒有 CI。新 adapter 的手動 smoke test：
 
 ```bash
 node grab.js "https://yoursite/product/<known-id>" --keep-open
 ```
 
-Compare the output folder image count vs. what you see on the page. Aim for >90% precision; missing the occasional image is fine, but **false positives** (cross-seller ads, recommendation thumbs) are a quality bug.
+對比輸出資料夾的圖數量跟你在頁面上看到的數量。目標 >90% 精準度；少抓幾張可以接受，但**誤判**（跨店家廣告、推薦縮圖混進來）是品質 bug。
 
 ## PR checklist
 
-If you're contributing an adapter:
+如果你要貢獻一個 adapter：
 
-- [ ] Extends `BaseAdapter`
-- [ ] Registered in `lib/adapters/index.js`
-- [ ] Manual smoke test against ≥3 different product URLs on the target site
-- [ ] No site credentials, cookies, or `.profile/` data committed
-- [ ] README updated to mention the new adapter
-- [ ] Note any rate-limiting or captcha behavior in the PR description
+- [ ] 繼承 `BaseAdapter`
+- [ ] 已在 `lib/adapters/index.js` 註冊
+- [ ] 對該網站至少 3 個不同商品 URL 跑過 smoke test
+- [ ] 沒 commit 任何 cookie / `.profile/` / 帳密
+- [ ] README 更新、有提到這個新 adapter
+- [ ] PR 描述裡寫清楚該網站的 rate limit 或驗證碼行為

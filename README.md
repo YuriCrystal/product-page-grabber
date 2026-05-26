@@ -1,3 +1,5 @@
+**English** | [繁體中文](./README.zh-TW.md)
+
 # product-page-grabber
 
 > A Playwright pattern for archiving product page images from your own shopping bookmarks.

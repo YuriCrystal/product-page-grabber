@@ -1,3 +1,5 @@
+**English** | [繁體中文](./DEVNOTE.zh-TW.md)
+
 # Dev note: product page image scraping is mostly a filtering problem
 
 When I first tried to bulk-archive Taobao product pages, the naive "grab every `<img>` on the page" approach gave me 80+ files per product, most of them garbage:
