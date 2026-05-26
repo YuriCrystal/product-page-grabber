@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Read the docs first
+    url: https://github.com/YuriCrystal/product-page-grabber/tree/main/docs
+    about: DEVNOTE.md explains the filter tricks. ADAPTERS.md walks through writing a new adapter.
+  - name: Read the examples
+    url: https://github.com/YuriCrystal/product-page-grabber/tree/main/examples
+    about: Common workflows for each supported site.

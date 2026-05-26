@@ -134,6 +134,46 @@ I (the author) provide this tool as-is under MIT. **You choose which sites to po
 
 If you're not sure whether a particular use is okay, the answer is probably "no" — find a properly licensed source instead.
 
+## Troubleshooting
+
+### 1688 throws "1688 hit captcha wall"
+
+1688 sometimes flags the session as automated and serves a CAPTCHA. The grabber detects this and stops with a clear error rather than returning garbage. To fix:
+
+1. Open the problem URL in any Chrome window that uses the same `.profile/` directory (or just use the same `grab.js "..." --keep-open` flow)
+2. Solve the captcha manually
+3. Close the window
+4. Re-run the grab — the session is now marked human
+
+### Taobao redirects to the login page
+
+`.profile/` is missing or expired. Re-run setup:
+
+```bash
+node setup.js              # default = Taobao
+node setup.js --site=1688  # or whichever adapter
+```
+
+Log in manually, close the browser, retry the grab.
+
+### Grab returns 0 images
+
+The site likely changed its DOM structure since the adapter was written. Run with `--keep-open` so you can inspect the page yourself:
+
+```bash
+node grab.js "..." --keep-open
+```
+
+If the page looks normal but no images come through, please [file a bug](../../issues/new/choose) with the URL + full CLI output.
+
+### Behance project download is huge
+
+Behance serves full-resolution source PNGs, often 10-25 MB each. A typical portfolio project = 200-500 MB on disk. There's no flag to limit this currently; if you want a leaner version, edit `behanceSizePixels` in `lib/adapters/behance.js` to deprioritize `source` and `2800_webp`.
+
+### Search results shuffle between runs
+
+Taobao and 1688 both reshuffle ranking on repeated queries. The `--idx N` flag refers to the **most recent** list, not a stable position. If a result jumped from #3 to #7 between two runs, you grabbed the wrong one. Re-run `--list` and use the freshest index.
+
 ## Tech stack
 
 - Node.js 18+

@@ -1,0 +1,80 @@
+name: Bug report
+description: An adapter broke, or a grab gave wrong/missing images.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please fill in everything below so the issue is reproducible — vague reports are likely to be closed without action.
+
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: Which adapter?
+      options:
+        - Taobao / Tmall
+        - "1688"
+        - Mercari Japan
+        - Behance
+        - (other / not sure)
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Sample URL that triggers the bug
+      description: A real product / page URL we can reproduce against. Redact any personal info from URL params if needed.
+      placeholder: https://item.taobao.com/item.htm?id=...
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Exact CLI command you ran
+      placeholder: node grab.js "..." --idx 3
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Full CLI output
+      description: Paste everything from "→ Launching browser..." to the end. Redact filenames if they contain personal info.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: e.g. "I expected ~20 product images, got 3" or "I expected a clean run, got an error"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: site-changed
+    attributes:
+      label: Did the site layout recently change?
+      description: If you saw a redesign or new UI on the site, mention it. Adapters break when sites rev DOM structure.
+      options:
+        - "No / not sure"
+        - "Yes, I saw new layout"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I read `docs/DEVNOTE.md` and the relevant adapter source
+          required: true
+        - label: I tried with `--keep-open` to inspect the page
+          required: false
+        - label: I'm using the latest commit on `main`
+          required: true

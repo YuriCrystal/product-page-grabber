@@ -135,6 +135,46 @@ skill 會帶你從「關鍵字 → 選結果 → 抓圖」一路完成。
 
 如果你不確定某個用法是否 OK、答案大概是「不 OK」、請改用正式授權的來源。
 
+## Troubleshooting
+
+### 1688 跳「1688 hit captcha wall」錯誤
+
+1688 偶爾會把 session 標成自動化、丟驗證碼。grabber 偵測到這個情況會明確報錯、不會回傳垃圾。解法：
+
+1. 用任何會吃到同一個 `.profile/` 的 Chrome 視窗開那個有問題的 URL（或直接 `grab.js "..." --keep-open`）
+2. 手動解掉驗證碼
+3. 關掉視窗
+4. 重抓 — session 已經標成「真人」
+
+### 淘寶被導去登入頁
+
+`.profile/` 沒了或過期。重跑 setup：
+
+```bash
+node setup.js              # 預設 = 淘寶
+node setup.js --site=1688  # 或要登的站
+```
+
+手動登、關掉瀏覽器、重抓。
+
+### 抓回 0 張圖
+
+很可能網站改 DOM 結構了。用 `--keep-open` 自己進去看頁面：
+
+```bash
+node grab.js "..." --keep-open
+```
+
+如果頁面看起來正常但抓不到圖、請[開 issue](../../issues/new/choose) 並附 URL ＋ 完整 CLI 輸出。
+
+### Behance 一個 project 下載量超大
+
+Behance 餵的是完整解析度原始 PNG、單張常常 10-25 MB。一個典型 portfolio project = 200-500 MB。目前沒有限制 flag；想要小一點的版本可以改 `lib/adapters/behance.js` 裡的 `behanceSizePixels`、把 `source` 跟 `2800_webp` 的優先級降下來。
+
+### 搜尋結果每次跑都換順序
+
+淘寶跟 1688 在重複 query 時會打亂排序。`--idx N` 永遠是參考**最近一次**列表的 index、不是穩定位置。如果同一個結果從 #3 跑到 #7、你會抓錯。重跑 `--list` 拿最新的 index。
+
 ## 技術 stack
 
 - Node.js 18+

@@ -1,0 +1,54 @@
+name: Feature request / new adapter
+description: Request a new adapter or a non-trivial feature.
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening: please read [`CONTRIBUTING.md`](../CONTRIBUTING.md) — it lists what kinds of adapters we want and don't want. PRs are more welcome than requests; if you can write the adapter yourself, even a rough draft, that's the fastest path.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: What kind of request?
+      options:
+        - New adapter (a specific site)
+        - Enhancement to an existing adapter
+        - New CLI feature
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: site
+    attributes:
+      label: Site / URL pattern
+      description: For new adapters — what site, and one sample product page URL.
+      placeholder: https://...
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: What's the use case?
+      description: Be specific. "I shop on X regularly and want to archive my saved items" is good. "It would be cool to have" is not.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: legitimacy
+    attributes:
+      label: Use case check
+      description: Adapter requests for sites whose primary purpose would be bulk scraping / training datasets / circumventing ToS will be closed.
+      options:
+        - Personal archiving of pages I have a relationship with
+        - Studying public design portfolios
+        - Other (please explain in use case)
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: Known anti-bot behavior on the target site? Login required? Anything you've already tried?
