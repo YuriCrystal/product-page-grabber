@@ -76,15 +76,16 @@ product-grab-202605261430/
 
 ## Adapter
 
-目前內建三個正式 adapter：
+目前內建四個正式 adapter：
 
 | 網站 | Adapter | 備註 |
 |------|---------|------|
 | 淘寶 / 天貓 | `lib/adapters/taobao.js` | 關鍵字走 `s.taobao.com/search`、以圖搜圖走「搜同款」、SKU 圖從 JS 資料物件抽取 |
 | 1688 | `lib/adapters/alibaba1688.js` | 關鍵字走 `s.1688.com`、用 filename 裡的 `!!<sellerId>` 做店家鎖定（跟淘寶結構不同）。目前只抓 5 張輪播主圖、商品詳情區的描述圖需要額外點分頁觸發 lazy load、尚未實作 |
 | Mercari 日本 | `lib/adapters/mercari.js` | 關鍵字走 `jp.mercari.com/search`、用 item ID 群組圖片、C2C 沒有 SKU |
+| Behance | `lib/adapters/behance.js` | 關鍵字走 `behance.net/search/projects`、整個 project 圖庫從 `mir-s3-cdn-cf.behance.net` 抓、同 hash 取最高解析度（source > 2800_webp > 1400_webp > fs_webp > disp） |
 
-用 `--site=taobao | 1688 | mercari` 指定 adapter，或直接給商品 URL 會自動判斷。
+用 `--site=taobao | 1688 | mercari | behance` 指定 adapter，或直接給商品 URL 會自動判斷。
 
 要寫自己的 adapter 看 [`docs/ADAPTERS.zh-TW.md`](docs/ADAPTERS.zh-TW.md)，base class 大概 30 行。
 

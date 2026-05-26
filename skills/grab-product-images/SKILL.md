@@ -1,12 +1,13 @@
 ---
 name: grab-product-images
 description: |
-  Archive product page images from a supported e-commerce site (Taobao / Tmall,
-  1688, Mercari Japan) via the `product-page-grabber` CLI. Use when the user wants
-  to download all images from a product listing — e.g. "抓淘寶的圖", "grab product
-  images", "download all photos from this taobao link", "抓 1688 的圖", "抓 mercari".
-  Walks them through keyword → top-10 selection → grab, or accepts a direct product
-  URL / reference image for reverse search.
+  Archive images from a supported page — e-commerce listings (Taobao / Tmall,
+  1688, Mercari Japan) or design project galleries (Behance) — via the
+  `product-page-grabber` CLI. Use when the user wants to download all images
+  from a listing or design project — e.g. "抓淘寶的圖", "grab product images",
+  "download all photos from this taobao link", "抓 1688 的圖", "抓 mercari",
+  "抓 behance project". Walks them through keyword → top-10 selection → grab,
+  or accepts a direct URL / reference image.
 triggers:
   - 抓淘寶
   - 抓商品圖
@@ -28,13 +29,14 @@ A Claude Code skill that wraps the `product-page-grabber` CLI in a natural-langu
 
 The user wants to download product images from a supported site. Their input may be:
 
-1. **A product URL** → grab directly. Supported:
+1. **A direct URL** → grab directly. Supported:
    - Taobao: `https://item.taobao.com/...`
    - Tmall: `https://detail.tmall.com/...`
    - 1688: `https://detail.1688.com/offer/...html` or `detail.m.1688.com/...?offerId=...`
    - Mercari Japan: `https://jp.mercari.com/item/m<id>`
-2. **A keyword** (e.g. "外置進氣口罩") → search, show top 10, ask which one to grab.
-   - Defaults to Taobao adapter. Pass `--site=1688` or `--site=mercari` to switch.
+   - Behance: `https://www.behance.net/gallery/<id>/<slug>`
+2. **A keyword** (e.g. "外置進氣口罩", "y2k poster") → search, show top 10, ask which one.
+   - Defaults to Taobao adapter. Pass `--site=1688 | mercari | behance` to switch.
 3. **An image file path** (e.g. `C:\photos\ref.jpg`) → reverse-image search (Taobao only for now).
 
 ## Prerequisites
